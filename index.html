@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Balancer Swap — Weighted Pools, Boosted Pools, BAL Token &amp; How It Works (2026)</title>
+  <meta name="description" content="Complete Balancer guide (2026): how Balancer's weighted AMM pools work, 80/20 pools explained, boosted pools, smart order routing, BAL token and veBAL governance, how to swap and provide liquidity on Balancer, security, and a deep FAQ for traders and LPs.">
+  <meta name="author" content="Crypto Finance Experts">
+  <link rel="canonical" href="https://balancer-swap-guide.example.com/">
+  <link rel="icon" type="image/png" href="bal.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://balancer-swap-guide.example.com/">
+  <meta property="og:title" content="Balancer Swap — Weighted Pools, BAL Token &amp; DeFi Guide (2026)">
+  <meta property="og:description" content="Practical Balancer guide: weighted AMM pools, 80/20 liquidity, boosted pools, BAL token, veBAL governance, smart order routing, and LP strategies.">
+  <meta property="og:image" content="cover.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Balancer Swap — Weighted AMM Guide (2026)">
+  <meta name="twitter:description" content="How Balancer's weighted pools work, 80/20 pools, BAL token, veBAL, boosted pools, and LP strategies for 2026.">
+
+  <style>
+    :root {
+      --p:    #6B45DC;
+      --p2:   #5A38C4;
+      --p3:   #472DAE;
+      --pa:   #9A7EF0;
+      --pb:   #C4B5FD;
+      --pc:   #EDE9FE;
+
+      --ink:   #FAF8FF;
+      --sub:   #C4B5FD;
+      --muted: #94A3B8;
+      --dim:   #64748B;
+
+      --bg:    #07050F;
+      --card:  rgba(255,255,255,.028);
+      --line:  rgba(255,255,255,.07);
+      --lp:    rgba(107,69,220,.15);
+
+      --ok:   #34D399;
+      --warn: #FBBF24;
+      --err:  #F87171;
+
+      --r:  12px;
+      --rl: 18px;
+      --gap: 1.2rem;
+      --sh: 0 8px 28px rgba(0,0,0,.60);
+      --shp: 0 4px 24px rgba(107,69,220,.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    html { scroll-behavior: smooth }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 900px 520px at 0%   0%,  rgba(90,56,196,.12), transparent 55%),
+        radial-gradient(ellipse 700px 400px at 100% 8%,  rgba(107,69,220,.07), transparent 50%),
+        radial-gradient(ellipse 600px 360px at 50%  98%, rgba(71,45,174,.08),  transparent 55%);
+      color: var(--muted);
+      line-height: 1.72;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    a { color: var(--pa); text-decoration: none }
+    a:hover { text-decoration: underline }
+    img { max-width: 100%; height: auto; display: block }
+    strong { color: #DDD6FE; font-weight: 600 }
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 1.4rem }
+
+    h1,h2,h3,h4 { color: var(--ink); line-height: 1.25 }
+    h1 { font-size: clamp(2rem,5vw,3.1rem); font-weight: 800; letter-spacing: -.4px }
+    h2 { font-size: clamp(1.25rem,2.5vw,1.75rem); font-weight: 700; margin-top: 1.8rem; padding-top: .7rem; border-top: 1px solid var(--line) }
+    h3 { font-size: 1.08rem; font-weight: 700; color: var(--sub) }
+    p,li,td,th { font-size: 1rem; line-height: 1.75 }
+    .lead { font-size: 1.08rem; color: #BAB4F7 }
+
+    /* HERO */
+    header.hero {
+      padding: clamp(2.5rem,6vw,5rem) 0 clamp(2rem,4vw,3.5rem);
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-card {
+      background: rgba(90,56,196,.05);
+      border: 1px solid var(--lp);
+      border-radius: var(--rl);
+      padding: clamp(1.4rem,3.5vw,2.4rem);
+      box-shadow: var(--sh), var(--shp);
+      position: relative; overflow: hidden;
+    }
+    .hero-card::after {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(154,126,240,.55), transparent);
+    }
+
+    .brand-row { display: flex; align-items: center; gap: .9rem; margin-bottom: 1rem }
+    .brand-logo {
+      width: 54px; height: 54px; border-radius: 13px;
+      border: 1px solid rgba(107,69,220,.28);
+      background: rgba(90,56,196,.10);
+      padding: .3rem; object-fit: contain;
+      box-shadow: 0 4px 14px rgba(107,69,220,.22);
+      flex: 0 0 auto;
+    }
+    .brand-label { color: var(--dim); font-size: .85rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px }
+    .brand-sub   { color: var(--muted); font-size: .85rem }
+
+    /* CTA */
+    .cta-center { display: flex; justify-content: center; margin-top: 2rem }
+    .cta {
+      display: inline-flex; align-items: center; gap: .7rem;
+      background: linear-gradient(135deg, #9A7EF0 0%, #6B45DC 42%, #5A38C4 76%, #472DAE 100%);
+      color: #fff;
+      padding: 1.2rem 3rem;
+      border-radius: 16px;
+      font-weight: 900; font-size: 1.15rem; letter-spacing: .15px;
+      box-shadow:
+        0 0 0 1px rgba(107,69,220,.28),
+        0 0 32px rgba(107,69,220,.34),
+        0 8px 22px rgba(90,56,196,.30),
+        0 20px 48px rgba(71,45,174,.22);
+      border: none; cursor: pointer; text-decoration: none;
+      transition: transform .18s, box-shadow .18s, filter .18s;
+    }
+    .cta:hover {
+      transform: translateY(-3px) scale(1.025); filter: brightness(1.08);
+      color: #fff; text-decoration: none;
+      box-shadow:
+        0 0 0 1px rgba(107,69,220,.44),
+        0 0 46px rgba(107,69,220,.48),
+        0 10px 28px rgba(90,56,196,.40),
+        0 26px 58px rgba(71,45,174,.32);
+    }
+
+    /* NOTE */
+    .note {
+      border-left: 3px solid var(--pa);
+      padding: .8rem 1rem;
+      background: rgba(90,56,196,.07);
+      border-radius: 0 9px 9px 0;
+      color: var(--sub); margin-top: 1rem;
+    }
+
+    /* STEPS */
+    section.step-guide {
+      padding: clamp(2rem,5vw,3.5rem) 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    .steps { display: grid; gap: var(--gap); grid-template-columns: 1fr }
+    .step {
+      background: var(--card); border: 1px solid var(--line);
+      border-top: 2px solid rgba(107,69,220,.30); border-radius: var(--r);
+      padding: 1.25rem; box-shadow: var(--sh); transition: transform .18s, box-shadow .18s;
+    }
+    .step:hover { transform: translateY(-3px); box-shadow: var(--sh), var(--shp) }
+    .step .icon {
+      width: 44px; height: 44px; border-radius: 9px;
+      display: inline-grid; place-items: center;
+      background: rgba(90,56,196,.12); margin-bottom: .65rem;
+      font-weight: 800; font-size: .95rem; color: var(--pa);
+      border: 1px solid rgba(107,69,220,.24);
+    }
+
+    /* CARD */
+    main { padding-top: .5rem }
+    main .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: var(--r); padding: 1.5rem; margin: 1.2rem 0; box-shadow: var(--sh);
+    }
+    main .card > h2:first-child { margin-top: 0; border-top: none; padding-top: 0 }
+
+    /* TOC */
+    .toc { border: 1px solid var(--lp); background: rgba(90,56,196,.05); border-radius: var(--r); padding: 1.1rem 1.3rem }
+    .toc strong { color: var(--ink) }
+    .toc ul { margin: .5rem 0 0; padding-left: 1.1rem }
+    .toc li { margin: .28rem 0; font-size: .96rem }
+    .toc a { font-weight: 600 }
+
+    /* GRID */
+    .callout-grid { display: grid; gap: var(--gap); grid-template-columns: 1fr; margin-top: .8rem }
+    .mini { background: rgba(255,255,255,.02); border: 1px solid var(--line); border-radius: var(--r); padding: 1rem }
+    .mini h3 { margin-bottom: .35rem }
+    .kpi-badges { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .55rem }
+    .kpi-badges span {
+      border: 1px solid rgba(107,69,220,.24); background: rgba(90,56,196,.09);
+      color: var(--sub); padding: .26rem .54rem;
+      border-radius: 999px; font-size: .87rem; font-weight: 600;
+    }
+
+    /* POOL WEIGHT VISUAL */
+    .pool-weight {
+      display: flex; border-radius: var(--r); overflow: hidden;
+      height: 36px; margin-top: .8rem; border: 1px solid var(--line);
+    }
+    .pw-seg {
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; font-weight: 800; color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+
+    /* TOKO BARS */
+    .toko-bar { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem }
+    .toko-row { display: flex; align-items: center; gap: .85rem }
+    .toko-label { min-width: 200px; font-size: .92rem; color: #DDD6FE; font-weight: 600 }
+    .toko-track { flex: 1; height: 8px; background: rgba(255,255,255,.07); border-radius: 999px; overflow: hidden }
+    .toko-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--pa), var(--p)) }
+    .toko-val   { min-width: 60px; text-align: right; font-size: .9rem; font-weight: 700; color: var(--pa) }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; border-radius: var(--r); border: 1px solid var(--line) }
+    table { width: 100%; border-collapse: collapse; min-width: 480px }
+    th,td { padding: .8rem .95rem; border-bottom: 1px solid var(--line); text-align: left }
+    th { background: rgba(90,56,196,.07); color: var(--ink); font-weight: 700; font-size: .93rem }
+    tr.hi { background: rgba(90,56,196,.04) }
+    tr:hover td { background: rgba(255,255,255,.018) }
+    tr:last-child td { border-bottom: none }
+    .ok { color: var(--ok) } .warn { color: var(--warn) } .err { color: var(--err) }
+
+    /* EEAT */
+    .eeat { background: var(--card); border: 1px solid var(--lp); border-radius: var(--r); padding: 1.5rem; box-shadow: var(--sh) }
+    .eeat > h2:first-child { margin-top: 0; border-top: none; padding-top: 0 }
+
+    /* FAQ */
+    .faq-item { border-bottom: 1px solid var(--line); padding: .9rem 0 }
+    .faq-item:last-child { border-bottom: none }
+    .faq-button { all: unset; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; cursor: pointer; gap: 1rem }
+    .faq-button:focus-visible { outline: 2px solid var(--p); border-radius: 4px }
+    .faq-button h3 { margin: 0; font-weight: 700; font-size: 1rem; line-height: 1.4 }
+    .faq-content { max-height: 0; overflow: hidden; transition: max-height .26s ease }
+    .faq-content.open { padding-top: .65rem }
+    .faq-plus { font-weight: 800; font-size: 1.35rem; color: var(--pa); flex: 0 0 auto; line-height: 1; transition: transform .2s }
+    .faq-button[aria-expanded="true"] .faq-plus { transform: rotate(45deg) }
+
+    @media(min-width:860px){
+      .steps { grid-template-columns: repeat(4,1fr) }
+      .callout-grid { grid-template-columns: 1fr 1fr }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero" role="banner">
+  <div class="container">
+    <div class="hero-card">
+      <div class="brand-row">
+        <img class="brand-logo" src="bal.png" alt="Balancer logo">
+        <div>
+          <div class="brand-label">Complete DEX Guide</div>
+          <div class="brand-sub">Weighted Pools · 80/20 Pools · Boosted Pools · BAL Token · veBAL · Smart Order Routing</div>
+        </div>
+      </div>
+
+      <h1>Balancer Swap</h1>
+      <p class="lead" style="margin-top:.7rem">
+        The complete guide to <strong>Balancer</strong> — the programmable AMM that goes
+        far beyond the standard 50/50 pool model. Understand how
+        <strong>weighted pools</strong> let projects hold any token ratio (80/20, 60/40, 98/2),
+        how <strong>boosted pools</strong> generate yield on idle liquidity,
+        how <strong>smart order routing</strong> splits trades across multiple pools
+        for best execution, how the <strong>BAL token</strong> and
+        <strong>veBAL vote-locking</strong> power a Curve Wars-style governance economy,
+        and why Balancer's architecture makes it uniquely suited for
+        <strong>protocol-owned liquidity</strong> and <strong>DeFi treasury management</strong>.
+      </p>
+
+      <div class="cta-center">
+        <a href="#" class="cta" aria-label="Open Balancer App">
+          <span>⬡</span> Launch Balancer
+        </a>
+      </div>
+
+      <div class="note">
+        <strong>What makes Balancer different:</strong> Every other major AMM forces LPs into
+        50/50 pools. Balancer lets you create pools with any weighting — 80/20, 98/2, or even
+        multi-token pools with up to 8 assets at custom ratios. This unlocks entirely new
+        LP strategies: hold 80% exposure to your preferred asset while still earning fees,
+        or build an on-chain index fund that auto-rebalances for free.
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- STEPS -->
+<section class="step-guide" aria-labelledby="how-works">
+  <div class="container">
+    <h2 id="how-works" style="margin-top:0;border-top:none;padding-top:0">
+      How Balancer Works: Choose Pool Type → Add Liquidity → Earn Fees → Govern with veBAL
+    </h2>
+    <div class="steps" role="list">
+      <article class="step" role="listitem">
+        <div class="icon">01</div>
+        <h3>Choose your pool type</h3>
+        <p>Balancer offers weighted pools (any ratio), stable pools (for pegged assets), boosted pools (yield on idle capital), and managed pools (dynamic weights). Each serves a different LP strategy and risk profile — no one-size-fits-all approach.</p>
+      </article>
+      <article class="step" role="listitem">
+        <div class="icon">02</div>
+        <h3>Add liquidity at your chosen ratio</h3>
+        <p>Deposit tokens into a Balancer pool. Unlike Uniswap, you can join an 80/20 pool by providing just 80% of one token and 20% of another — maintaining asymmetric exposure while still earning trading fees from all swaps through the pool.</p>
+      </article>
+      <article class="step" role="listitem">
+        <div class="icon">03</div>
+        <h3>Earn fees from Balancer's smart routing</h3>
+        <p>Balancer's smart order router splits large trades across multiple pools to minimise price impact. Your liquidity earns fees from every trade routed through it — including trades partially routed through your pool as part of a larger multi-hop swap.</p>
+      </article>
+      <article class="step" role="listitem">
+        <div class="icon">04</div>
+        <h3>Lock BAL as veBAL to govern emission direction</h3>
+        <p>Lock BAL tokens for up to 1 year to receive veBAL — Balancer's vote-escrowed governance token. veBAL holders direct BAL emissions to gauge pools, earn protocol fees, and receive bribes from protocols competing for gauge votes. Balancer's own Curve Wars.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<main class="container" role="main">
+
+  <!-- TOC -->
+  <section class="card toc" aria-label="Table of Contents">
+    <strong>On this page — Balancer Swap:</strong>
+    <ul>
+      <li><a href="#overview">What is Balancer and how it differs from Uniswap and Curve</a></li>
+      <li><a href="#weighted">Weighted pools: any ratio AMM and the 80/20 pool explained</a></li>
+      <li><a href="#pool-types">All Balancer pool types: weighted, stable, boosted, managed</a></li>
+      <li><a href="#sor">Smart Order Routing: how Balancer finds best execution for swaps</a></li>
+      <li><a href="#bal-token">BAL token: emissions, utility, and governance</a></li>
+      <li><a href="#vebal">veBAL: vote-locking, gauge votes, bribes, and revenue share</a></li>
+      <li><a href="#protocol-liquidity">Protocol-owned liquidity: why projects choose Balancer</a></li>
+      <li><a href="#how-to-lp">How to provide liquidity on Balancer: step-by-step</a></li>
+      <li><a href="#safety">Balancer security and LP risks</a></li>
+      <li><a href="#comparison">Balancer vs Uniswap vs Curve vs Aerodrome: AMM comparison</a></li>
+      <li><a href="#best-practices">Best practices for Balancer LPs and veBAL holders</a></li>
+      <li><a href="#troubleshooting">Troubleshooting: swap failures, LP issues, veBAL locks</a></li>
+      <li><a href="#eeat">Authoritative sources &amp; references</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section class="card" id="overview">
+    <h2>What Is Balancer and How It Differs From Uniswap and Curve</h2>
+    <p>
+      <strong>Balancer</strong> is a programmable AMM protocol that extends the
+      standard constant product formula into a generalised
+      <strong>constant weighted product</strong> — allowing pools with any number of tokens
+      at any desired weight ratio, not just two tokens at 50/50.
+    </p>
+    <p>
+      This generalisation makes Balancer fundamentally more flexible than Uniswap
+      (optimised for 50/50 volatile pairs) and more versatile than Curve
+      (optimised for pegged stablecoin pairs). Balancer occupies the middle ground —
+      handling everything from 2-token weighted pools to 8-token index-like portfolios,
+      from stable pairs to yield-bearing boosted positions.
+    </p>
+
+    <div class="callout-grid">
+      <div class="mini">
+        <h3>Balancer vs Uniswap</h3>
+        <p style="color:var(--muted)">Uniswap forces 50/50 weighting — you always hold equal value of both tokens. Balancer lets you hold 80% ETH and 20% USDC in a pool, maintaining higher ETH exposure while earning fees. Uniswap V3 adds capital efficiency via concentration; Balancer adds weighting flexibility and multi-token pools.</p>
+        <div class="kpi-badges"><span>Any weight ratio</span><span>Multi-token</span><span>Asset-biased LPs</span></div>
+      </div>
+      <div class="mini">
+        <h3>Balancer vs Curve</h3>
+        <p style="color:var(--muted)">Curve is optimised for pegged assets (USDC/USDT) using the StableSwap invariant — extremely low slippage near peg but not suitable for volatile assets. Balancer serves both volatile-weight pools and stable pools via its Stable Pool type, plus adds boosted pools with yield on idle capital and managed pools with dynamic weights.</p>
+        <div class="kpi-badges"><span>Volatile + stable</span><span>Boosted idle yield</span><span>Dynamic weights</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEIGHTED POOLS -->
+  <section class="card" id="weighted">
+    <h2>Weighted Pools: Any-Ratio AMM and the 80/20 Pool Explained</h2>
+    <p>
+      Balancer's <strong>weighted pool</strong> is its flagship innovation —
+      a pool where each token's weight determines its price impact on swaps,
+      and LPs provide liquidity at the chosen ratio rather than forced 50/50.
+    </p>
+
+    <!-- Pool weight visuals -->
+    <h3 style="margin-top:1.2rem">Pool weight examples</h3>
+
+    <p style="margin-bottom:.5rem; font-size:.95rem">80/20 Pool — ETH/USDC</p>
+    <div class="pool-weight" aria-label="80/20 pool weight distribution">
+      <div class="pw-seg" style="width:80%; background: linear-gradient(90deg,#6B45DC,#5A38C4)">ETH 80%</div>
+      <div class="pw-seg" style="width:20%; background: rgba(255,255,255,.12); color:#94A3B8">USDC 20%</div>
+    </div>
+
+    <p style="margin-bottom:.5rem; margin-top:.9rem; font-size:.95rem">50/50 Pool — ETH/DAI (standard Uniswap-style)</p>
+    <div class="pool-weight" aria-label="50/50 pool weight distribution">
+      <div class="pw-seg" style="width:50%; background: linear-gradient(90deg,#9A7EF0,#6B45DC)">ETH 50%</div>
+      <div class="pw-seg" style="width:50%; background: rgba(255,255,255,.10); color:#94A3B8">DAI 50%</div>
+    </div>
+
+    <p style="margin-bottom:.5rem; margin-top:.9rem; font-size:.95rem">60/20/20 Multi-token Pool — WBTC / ETH / USDC</p>
+    <div class="pool-weight" aria-label="60/20/20 pool weight distribution">
+      <div class="pw-seg" style="width:60%; background: linear-gradient(90deg,#8B6EE8,#6B45DC)">WBTC 60%</div>
+      <div class="pw-seg" style="width:20%; background: rgba(107,69,220,.35)">ETH 20%</div>
+      <div class="pw-seg" style="width:20%; background: rgba(255,255,255,.10); color:#94A3B8">USDC 20%</div>
+    </div>
+
+    <div class="note" style="margin-top:1.2rem">
+      <strong>The 80/20 pool advantage for token projects:</strong> A project can create an
+      80/20 pool with 80% of their native token and 20% ETH. This means the protocol
+      needs far less ETH capital to bootstrap deep liquidity — the native token covers 80%.
+      LPs hold 80% native token exposure (bullish bias) while earning trading fees.
+      The 80/20 BAL/WETH pool is Balancer's own flagship example of this model in action.
+    </div>
+
+    <div class="table-wrap" style="margin-top:1rem">
+      <table aria-label="Pool weight comparison">
+        <thead>
+          <tr><th>Weight ratio</th><th>LP exposure bias</th><th>Impermanent loss vs 50/50</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td>50/50</td>
+            <td>Equal both tokens</td>
+            <td>Standard — baseline IL</td>
+            <td>Equal conviction in both assets</td>
+          </tr>
+          <tr>
+            <td>80/20</td>
+            <td>Strong bias to larger-weight token</td>
+            <td class="ok">Significantly reduced IL vs 50/50</td>
+            <td>Token project liquidity; bullish bias LPs</td>
+          </tr>
+          <tr class="hi">
+            <td>98/2</td>
+            <td>Nearly full single-token exposure</td>
+            <td class="ok">Near-zero IL</td>
+            <td>Single-sided liquidity-like exposure with minimal pool risk</td>
+          </tr>
+          <tr>
+            <td>60/20/20 (3-token)</td>
+            <td>Diversified multi-asset</td>
+            <td class="warn">Complex — depends on all asset correlations</td>
+            <td>On-chain index fund; diversified protocol treasury</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- POOL TYPES -->
+  <section class="card" id="pool-types">
+    <h2>All Balancer Pool Types: Weighted, Stable, Boosted, and Managed</h2>
+
+    <div class="table-wrap">
+      <table aria-label="Balancer pool types">
+        <thead>
+          <tr><th>Pool type</th><th>Mechanism</th><th>Best for</th><th>Key feature</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td><strong>Weighted Pool</strong></td>
+            <td>Constant weighted product — any ratio, up to 8 tokens</td>
+            <td>Protocol liquidity, index portfolios, biased LP exposure</td>
+            <td>Custom weights; flexible multi-token composition</td>
+          </tr>
+          <tr>
+            <td><strong>Stable Pool</strong></td>
+            <td>StableSwap invariant — low slippage near peg</td>
+            <td>Stablecoin pairs, liquid staking tokens (stETH/ETH)</td>
+            <td>Near-zero slippage within peg range; supports yield-bearing tokens</td>
+          </tr>
+          <tr class="hi">
+            <td><strong>Boosted Pool</strong></td>
+            <td>Idle liquidity deployed to Aave/Yearn to earn yield</td>
+            <td>Stablecoin LPs who want additional yield on un-traded capital</td>
+            <td>Earns lending yield on liquidity not actively being traded</td>
+          </tr>
+          <tr>
+            <td><strong>Managed Pool</strong></td>
+            <td>Dynamic weights adjustable by a pool manager over time</td>
+            <td>Active on-chain fund strategies; gradual rebalancing</td>
+            <td>Weight changes over time without sudden market impact</td>
+          </tr>
+          <tr class="hi">
+            <td><strong>Composable Stable Pool</strong></td>
+            <td>Updated StableSwap with composability and BPT nesting</td>
+            <td>Nested pool strategies; boosted stable pairs</td>
+            <td>Allows pool tokens to be used as inputs to other pools</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <strong>Boosted pools: yield on idle capital</strong> — in a standard AMM,
+      only a fraction of deposited liquidity is actively used for trading at any moment.
+      Balancer's boosted pools deploy the idle portion to Aave or Yearn to earn interest,
+      so LPs earn both trading fees AND lending yield simultaneously.
+      This makes boosted stablecoin pools significantly more capital-efficient
+      than equivalent Uniswap or Curve positions.
+    </div>
+  </section>
+
+  <!-- SMART ORDER ROUTING -->
+  <section class="card" id="sor">
+    <h2>Smart Order Routing: How Balancer Finds Best Execution for Every Swap</h2>
+    <p>
+      Balancer's <strong>Smart Order Router (SOR)</strong> is the algorithm that powers
+      Balancer's swap interface — automatically finding the optimal trade path across
+      all Balancer pools (and integrated external sources) to maximise output for traders.
+    </p>
+
+    <div class="callout-grid">
+      <div class="mini">
+        <h3>What SOR does</h3>
+        <p style="color:var(--muted)">For any swap, SOR evaluates every possible path: direct pool swaps, multi-hop routes (A→B→C), and split routes (50% through Pool 1 + 50% through Pool 2). It calculates the mathematically optimal split that maximises the output amount, executing across multiple pools in a single atomic transaction.</p>
+        <div class="kpi-badges"><span>Multi-hop routing</span><span>Split execution</span><span>Single transaction</span></div>
+      </div>
+      <div class="mini">
+        <h3>Why SOR benefits LPs</h3>
+        <p style="color:var(--muted)">SOR routes volume to the most efficient pools — which means smaller, niche Balancer pools with unusual weightings can capture trading volume from large swaps that split across many pools. Even a 98/2 pool might receive part of a large ETH trade if it offers better partial execution than a direct single-pool route.</p>
+        <div class="kpi-badges"><span>Volume to all pools</span><span>Niche pool viability</span><span>Fee distribution</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Balancer as an aggregator layer:</strong> Balancer's SOR is used not just
+      in Balancer's own front-end but is integrated into DEX aggregators like 1inch
+      and Paraswap — meaning trades routed through aggregators can tap Balancer's
+      pool depth even when the user is interacting with a different interface.
+      This drives fee income to Balancer LPs from aggregator-routed volume.
+    </div>
+  </section>
+
+  <!-- BAL TOKEN -->
+  <section class="card" id="bal-token">
+    <h2>BAL Token: Emissions, Utility, and Governance</h2>
+    <p>
+      <strong>BAL</strong> is Balancer's native governance token, emitted to liquidity
+      providers and convertible to veBAL for governance participation and revenue sharing.
+    </p>
+
+    <div class="table-wrap">
+      <table aria-label="BAL token utility">
+        <thead>
+          <tr><th>Function</th><th>How BAL is used</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td>Liquidity mining</td>
+            <td>BAL is distributed to gauge-approved pool LPs — the primary mechanism for new BAL supply reaching the market</td>
+          </tr>
+          <tr>
+            <td>veBAL conversion</td>
+            <td>Lock BAL/WETH 80/20 BPT for up to 1 year to receive veBAL — the governance and revenue-share position</td>
+          </tr>
+          <tr class="hi">
+            <td>DAO governance</td>
+            <td>BAL holders vote on protocol parameters via Snapshot and on-chain governance — fee settings, pool gauge approvals, treasury</td>
+          </tr>
+          <tr>
+            <td>Protocol fee accrual</td>
+            <td>A portion of all Balancer swap fees flows to the veBAL holders — real yield from protocol trading activity</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="toko-bar" role="list" aria-label="BAL token distribution">
+      <div class="toko-row" role="listitem">
+        <span class="toko-label">Ecosystem / LM incentives</span>
+        <div class="toko-track"><div class="toko-fill" style="width:65%"></div></div>
+        <span class="toko-val">65%</span>
+      </div>
+      <div class="toko-row" role="listitem">
+        <span class="toko-label">Founders &amp; core team</span>
+        <div class="toko-track"><div class="toko-fill" style="width:25%"></div></div>
+        <span class="toko-val">25%</span>
+      </div>
+      <div class="toko-row" role="listitem">
+        <span class="toko-label">Investors</span>
+        <div class="toko-track"><div class="toko-fill" style="width:10%"></div></div>
+        <span class="toko-val">10%</span>
+      </div>
+    </div>
+    <p style="font-size:.88rem; color:var(--dim); margin-top:.6rem">Max supply: 100,000,000 BAL. Verify distribution via official Balancer documentation.</p>
+  </section>
+
+  <!-- veBAL -->
+  <section class="card" id="vebal">
+    <h2>veBAL: Vote-Locking, Gauge Votes, Bribes, and Protocol Revenue Share</h2>
+    <p>
+      <strong>veBAL</strong> (vote-escrowed BAL) is Balancer's governance position —
+      obtained by locking the BAL/WETH 80/20 Balancer Pool Token (BPT)
+      for a period of up to 1 year. The longer the lock, the more veBAL received.
+    </p>
+
+    <div class="callout-grid">
+      <div class="mini">
+        <h3>What veBAL controls</h3>
+        <p style="color:var(--muted)">veBAL holders vote on which Balancer pools receive BAL gauge emissions each epoch. Directing emissions to a pool increases its LP APR, attracting more liquidity. This vote is extremely valuable — it's how protocols build deep liquidity on Balancer without continuously buying BAL.</p>
+        <div class="kpi-badges"><span>Gauge weight votes</span><span>BAL emission direction</span><span>LP APR control</span></div>
+      </div>
+      <div class="mini">
+        <h3>veBAL revenue and bribes</h3>
+        <p style="color:var(--muted)">veBAL holders earn: (1) a share of Balancer's protocol swap fees distributed as bb-a-USD (boosted stablecoin), (2) bribes from protocols paying veBAL voters to direct emissions to their pools via platforms like Hidden Hand. The bribe economy makes veBAL highly capital-efficient for long-term governance participants.</p>
+        <div class="kpi-badges"><span>Protocol fees</span><span>Bribes (Hidden Hand)</span><span>bb-a-USD rewards</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:1rem">
+      <table aria-label="veBAL mechanics">
+        <thead>
+          <tr><th>Mechanic</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td>Lock asset</td>
+            <td>Lock the BAL/WETH 80/20 BPT (not raw BAL) — you must first be an LP in the 80/20 pool</td>
+          </tr>
+          <tr>
+            <td>Max lock period</td>
+            <td>1 year — shorter locks receive proportionally less veBAL</td>
+          </tr>
+          <tr class="hi">
+            <td>veBAL decay</td>
+            <td>veBAL balance decays linearly toward zero at lock expiry — vote power diminishes over time, incentivising regular relocking</td>
+          </tr>
+          <tr>
+            <td>Boost for LPs</td>
+            <td>Holding veBAL boosts your own BAL gauge rewards in pools you LP — up to 2.5× boost, similar to Curve's veCRV boost</td>
+          </tr>
+          <tr class="hi">
+            <td>Protocol fee share</td>
+            <td>75% of Balancer's collected protocol fees distributed to veBAL holders weekly in bb-a-USD (boosted stablecoin)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <strong>veBAL vs veCRV:</strong> Balancer's veBAL system is directly modelled on
+      Curve's veCRV — same vote-escrow mechanics, same gauge weight voting, same bribe ecosystem.
+      The key difference: veBAL requires locking the BAL/WETH 80/20 LP token
+      (not raw BAL), which means veBAL lockers also receive 80/20 pool trading fees
+      on top of their veBAL rewards. Aura Finance is to Balancer what Convex is to Curve —
+      aggregating veBAL for delegated governance, BAL boost, and bribe capture.
+    </div>
+  </section>
+
+  <!-- PROTOCOL LIQUIDITY -->
+  <section class="card" id="protocol-liquidity">
+    <h2>Protocol-Owned Liquidity: Why DeFi Projects Choose Balancer</h2>
+    <p>
+      Balancer has emerged as the preferred AMM for DeFi protocols managing their own
+      treasury liquidity — particularly through the <strong>80/20 pool model</strong>
+      and Balancer's <strong>Liquidity Bootstrapping Pools (LBPs)</strong>.
+    </p>
+
+    <div class="callout-grid">
+      <div class="mini">
+        <h3>80/20 pools for protocols</h3>
+        <p style="color:var(--muted)">A protocol that wants deep liquidity for its token can create an 80/20 TOKEN/ETH pool. The project provides 80% in their native token (which they hold anyway) and only 20% in ETH. This dramatically reduces the ETH capital required to bootstrap liquidity versus a 50/50 pool — Balancer itself uses this model for BAL/WETH liquidity.</p>
+        <div class="kpi-badges"><span>Capital efficient</span><span>Native token bias</span><span>Protocol treasury</span></div>
+      </div>
+      <div class="mini">
+        <h3>Liquidity Bootstrapping Pools (LBP)</h3>
+        <p style="color:var(--muted)">LBPs are a Balancer-specific pool type for token launches — starting at a high weight (e.g. 90% new token) and gradually decreasing over days, creating natural downward price pressure that discourages bots and allows price discovery. Many major DeFi token launches have used Balancer LBPs as a fairer alternative to standard DEX launches.</p>
+        <div class="kpi-badges"><span>Anti-bot launch</span><span>Price discovery</span><span>Gradual weight shift</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO LP -->
+  <section class="card" id="how-to-lp">
+    <h2>How to Provide Liquidity on Balancer: Step-by-Step</h2>
+    <ol style="padding-left:1.3rem">
+      <li style="margin-bottom:.6rem"><strong>Navigate to the official Balancer app</strong> — go to app.balancer.fi (bookmarked URL). Verify the domain before connecting your wallet.</li>
+      <li style="margin-bottom:.6rem"><strong>Connect your wallet</strong> — Balancer is deployed on Ethereum mainnet, Arbitrum, Optimism, Polygon, and other networks. Select the correct network in your wallet before connecting.</li>
+      <li style="margin-bottom:.6rem"><strong>Browse pools</strong> — use the Pools section to find pools by TVL, APR, and pool type. Filter by your preferred token exposure and pool type (weighted, stable, boosted).</li>
+      <li style="margin-bottom:.6rem"><strong>Select a pool and review the composition</strong> — check the token weights, current APR (fees + BAL emissions), total TVL, and pool type before committing capital.</li>
+      <li style="margin-bottom:.6rem"><strong>Add liquidity</strong> — click "Add Liquidity" on your chosen pool. Balancer allows proportional or single-token joins (single-token join is more convenient but incurs a small price impact).</li>
+      <li style="margin-bottom:.6rem"><strong>Approve tokens and confirm</strong> — approve Balancer's vault contract to interact with your tokens, then confirm the liquidity transaction. You receive BPT (Balancer Pool Tokens) representing your share.</li>
+      <li style="margin-bottom:.6rem"><strong>Stake BPT in the gauge</strong> — for pools with gauge approval, stake your BPT in the corresponding gauge to earn BAL emissions on top of trading fees.</li>
+      <li><strong>Optional: lock BPT as veBAL</strong> — for the BAL/WETH 80/20 pool specifically, you can lock your BPT as veBAL to earn protocol fee revenue and participate in gauge voting.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Single-token joins:</strong> Balancer allows you to add liquidity using just
+      one token even for multi-token pools. The protocol internally swaps to balance the pool,
+      incurring a small price impact. For large additions, proportional joins (using all
+      tokens in the pool's ratio) avoid this cost. Check the "price impact" indicator
+      when using single-token joins for large amounts.
+    </div>
+  </section>
+
+  <!-- SAFETY -->
+  <section class="card" id="safety">
+    <h2>Balancer Security and LP Risks</h2>
+
+    <div class="table-wrap">
+      <table aria-label="Risk analysis">
+        <thead>
+          <tr><th>Risk</th><th>Level</th><th>Description &amp; Mitigation</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td>Smart-contract exploit (Vault)</td>
+            <td class="warn">Medium</td>
+            <td>Balancer's central Vault contract holds all pool assets — a single exploit affects all pools. Multiple audits; $1M+ bug bounty; Balancer has operated since 2020 with significant TVL</td>
+          </tr>
+          <tr>
+            <td>Flash loan price manipulation</td>
+            <td class="warn">Medium</td>
+            <td>Balancer has been targeted by flash loan attacks historically (2020). Subsequent redesigns implemented flash loan protection in the Vault; monitor for new pool-specific vulnerabilities</td>
+          </tr>
+          <tr class="hi">
+            <td>Impermanent loss (weighted pools)</td>
+            <td class="warn">Medium (lower than 50/50)</td>
+            <td>Asymmetric pools (80/20) significantly reduce IL vs 50/50 — but IL still exists when the price ratio between pool tokens changes. Higher weight toward one asset = lower IL exposure</td>
+          </tr>
+          <tr>
+            <td>Boosted pool underlying risk</td>
+            <td class="warn">Medium</td>
+            <td>Boosted pools deploy idle capital to Aave — an exploit in Aave directly affects boosted pool value. Two protocol risk layers stacked together</td>
+          </tr>
+          <tr class="hi">
+            <td>veBAL lock illiquidity</td>
+            <td class="warn">Low-Medium</td>
+            <td>veBAL position cannot be exited before lock expiry. Do not lock capital needed before expiry. Max 1-year lock limits exposure vs Curve's 4-year maximum</td>
+          </tr>
+          <tr>
+            <td>Phishing / fake Balancer sites</td>
+            <td class="err">High (user-controlled)</td>
+            <td>Bookmark app.balancer.fi and verify domain every session. Balancer's vault approvals are high-value targets</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="card" id="comparison">
+    <h2>Balancer vs Uniswap vs Curve vs Aerodrome: AMM Comparison</h2>
+
+    <div class="table-wrap">
+      <table aria-label="AMM comparison">
+        <thead>
+          <tr><th>Feature</th><th>Balancer</th><th>Uniswap V3</th><th>Curve</th><th>Aerodrome</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td>Pool weight flexibility</td>
+            <td class="ok">Any ratio — 98/2 to 50/50</td>
+            <td class="err">50/50 only</td>
+            <td class="err">Typically equal weight</td>
+            <td class="warn">Stable + volatile 50/50</td>
+          </tr>
+          <tr>
+            <td>Multi-token pools</td>
+            <td class="ok">Up to 8 tokens per pool</td>
+            <td class="err">2 tokens only</td>
+            <td class="warn">3–4 tokens max</td>
+            <td class="err">2 tokens</td>
+          </tr>
+          <tr class="hi">
+            <td>Capital efficiency</td>
+            <td class="warn">Good (boosted pools)</td>
+            <td class="ok">Highest (concentrated ranges)</td>
+            <td class="ok">Very high near peg</td>
+            <td class="warn">Moderate</td>
+          </tr>
+          <tr>
+            <td>Vote-escrow governance</td>
+            <td class="ok">veBAL (1-year max)</td>
+            <td class="err">None</td>
+            <td class="ok">veCRV (4-year max)</td>
+            <td class="ok">veAERO</td>
+          </tr>
+          <tr class="hi">
+            <td>Boosted yield (idle capital)</td>
+            <td class="ok">Yes — boosted pools</td>
+            <td class="err">No</td>
+            <td class="err">No</td>
+            <td class="err">No</td>
+          </tr>
+          <tr>
+            <td>Best for</td>
+            <td>Protocol liquidity, index portfolios, LBP launches</td>
+            <td>Active LP concentrated positions</td>
+            <td>Stablecoin + LST liquidity</td>
+            <td>Base Chain native DeFi</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BEST PRACTICES -->
+  <section class="card" id="best-practices">
+    <h2>Best Practices for Balancer LPs and veBAL Holders</h2>
+
+    <h3>For liquidity providers</h3>
+    <ul style="padding-left:1.2rem; margin-bottom:1.2rem">
+      <li style="margin-bottom:.5rem"><strong>Match pool type to your asset strategy</strong> — use weighted pools for directional token exposure, stable pools for stablecoin pairs, and boosted pools when you want additional yield on stable capital without extra management.</li>
+      <li style="margin-bottom:.5rem"><strong>Stake BPT in the gauge immediately after adding liquidity</strong> — unstaked BPT earns only trading fees. The BAL emission component (often 50–80% of total APR) requires gauge staking. Don't leave BPT unstaked.</li>
+      <li style="margin-bottom:.5rem"><strong>For large single-token joins, check price impact</strong> — use proportional joins (multi-token at pool ratio) for large amounts to avoid self-inflicted slippage from the internal rebalancing swap.</li>
+      <li><strong>Monitor boosted pool underlying protocol health</strong> — if Aave or Yearn experiences issues, boosted pool values are directly affected. Diversify across pool types for larger LP positions.</li>
+    </ul>
+
+    <h3>For veBAL holders</h3>
+    <ul style="padding-left:1.2rem">
+      <li style="margin-bottom:.5rem"><strong>Vote every epoch on Hidden Hand</strong> — unclaimed bribe epochs are forfeited. Set a recurring reminder for every 2-week governance period to vote and claim your share of bribe rewards.</li>
+      <li style="margin-bottom:.5rem"><strong>Relock before expiry to maintain voting power</strong> — veBAL decays linearly. Relocking at max duration regularly maximises both your boost and bribe earnings.</li>
+      <li><strong>Consider Aura Finance for delegated veBAL</strong> — Aura aggregates veBAL similarly to how Convex aggregates veCRV, offering enhanced BAL boost and bribe capture without requiring direct pool participation. Evaluate Aura vs direct veBAL based on your position size and management preference.</li>
+    </ul>
+  </section>
+
+  <!-- TROUBLESHOOTING -->
+  <section class="card" id="troubleshooting">
+    <h2>Troubleshooting Balancer: Swap Failures, LP Issues, and veBAL Locks</h2>
+
+    <h3>"My swap failed on Balancer"</h3>
+    <ul style="padding-left:1.2rem">
+      <li>Check the failed transaction on Etherscan for the revert reason. Common Balancer-specific errors: SWAP_LIMIT (slippage exceeded — price moved beyond your tolerance), BAL#507 (insufficient pool liquidity for the requested trade size).</li>
+      <li>For large swaps, try using a smaller amount or increasing slippage. Alternatively, use a DEX aggregator (1inch, Paraswap) which may find a better-split route using Balancer's SOR alongside other protocols.</li>
+    </ul>
+
+    <h3>"My BPT isn't showing after adding liquidity"</h3>
+    <ul style="padding-left:1.2rem">
+      <li>Verify the transaction on Etherscan — if it succeeded, the BPT is in your wallet. Add the BPT contract address manually to your wallet's token list if it doesn't appear automatically.</li>
+      <li>If you staked BPT in the gauge immediately, it will show in the Balancer gauge dashboard rather than your wallet balance. Check your staked positions in the Balancer app's portfolio view.</li>
+    </ul>
+
+    <h3>"I can't unlock my veBAL early"</h3>
+    <ul style="padding-left:1.2rem">
+      <li>veBAL locks are absolute — the locked BPT cannot be withdrawn before the expiry date under any circumstances. There is no emergency exit. Plan capital allocation around this constraint before locking.</li>
+      <li>If your veBAL has expired but still shows locked, initiate the withdrawal via the veBAL section of the Balancer app — expired locks must be manually withdrawn, they don't automatically return to your wallet.</li>
+    </ul>
+
+    <div class="note">
+      <strong>Balancer's Vault is the canonical source:</strong> All Balancer pool assets
+      are held in a single central Vault contract. For any LP balance or swap verification,
+      use Etherscan with your wallet address and the Balancer Vault contract address
+      to confirm the on-chain state definitively.
+    </div>
+  </section>
+
+  <!-- EEAT -->
+  <section class="eeat" id="eeat" aria-labelledby="eeat-title">
+    <h2 id="eeat-title">Balancer: Authoritative References &amp; External Sources</h2>
+
+    <h3>Balancer — Official Sources</h3>
+    <ul style="padding-left:1.2rem">
+      <li><a href="https://app.balancer.fi/" target="_blank" rel="noopener nofollow">Balancer — Official DEX App</a></li>
+      <li><a href="https://docs.balancer.fi/" target="_blank" rel="noopener nofollow">Balancer — Official Documentation</a></li>
+      <li><a href="https://github.com/balancer" target="_blank" rel="noopener nofollow">Balancer — Smart Contracts (GitHub)</a></li>
+      <li><a href="https://forum.balancer.fi/" target="_blank" rel="noopener nofollow">Balancer — Governance Forum</a></li>
+    </ul>
+
+    <h3>Ecosystem</h3>
+    <ul style="padding-left:1.2rem">
+      <li><a href="https://aura.finance/" target="_blank" rel="noopener nofollow">Aura Finance — veBAL Aggregator (Balancer's Convex equivalent)</a></li>
+      <li><a href="https://hiddenhand.finance/" target="_blank" rel="noopener nofollow">Hidden Hand — veBAL Bribe Marketplace</a></li>
+      <li><a href="https://defillama.com/protocol/balancer" target="_blank" rel="noopener nofollow">DeFiLlama — Balancer TVL &amp; Volume Data</a></li>
+    </ul>
+
+    <h3>Research &amp; Security</h3>
+    <ul style="padding-left:1.2rem">
+      <li><a href="https://dune.com/browse/dashboards" target="_blank" rel="noopener nofollow">Dune Analytics — Balancer On-Chain Dashboards</a></li>
+      <li><a href="https://revoke.cash/" target="_blank" rel="noopener nofollow">Revoke.cash — Token Approval Manager</a></li>
+      <li><a href="https://blog.openzeppelin.com/security-audits" target="_blank" rel="noopener nofollow">OpenZeppelin — Smart Contract Audits</a></li>
+    </ul>
+
+    <div class="note" style="margin-top:1.2rem">
+      <strong>About:</strong> Prepared by Crypto Finance Experts as a practical, SEO-oriented knowledge base for
+      <em>Balancer Swap</em>: weighted AMM pools, 80/20 pools, boosted pools, smart order routing, BAL token, veBAL, LBPs, protocol-owned liquidity, and security.
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="card" id="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title" style="margin-top:0;border-top:none;padding-top:0">Balancer: Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f1" id="b1">
+        <h3>What is Balancer and what makes it different from Uniswap?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f1" class="faq-content" role="region" aria-labelledby="b1">
+        <p>Balancer is a programmable AMM that extends the constant product formula to support pools with any token weighting (not just 50/50), up to 8 tokens per pool, and multiple pool types (weighted, stable, boosted, managed). This means an LP can hold 80% ETH and 20% USDC in a pool — maintaining directional bias — while still earning fees from all trades. Uniswap forces 50/50 and only supports 2-token pools. Balancer's flexibility makes it the preferred AMM for protocol-owned liquidity and DeFi index strategies.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f2" id="b2">
+        <h3>What is an 80/20 pool and why would I use one?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f2" class="faq-content" role="region" aria-labelledby="b2">
+        <p>An 80/20 pool holds 80% of one token and 20% of another — you're providing liquidity while maintaining a heavily skewed exposure. Key benefit: significantly lower impermanent loss than a 50/50 pool, because your exposure is closer to simply holding the dominant token. Protocols use 80/20 pools (TOKEN/ETH) to create deep liquidity while only needing 20% ETH capital — the rest is their own native token. Balancer's own BAL/WETH 80/20 pool is the canonical example, and locking its BPT gives you veBAL.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f3" id="b3">
+        <h3>What are boosted pools and how do they generate extra yield?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f3" class="faq-content" role="region" aria-labelledby="b3">
+        <p>Boosted pools deploy the idle portion of pool liquidity (the capital not currently needed for swaps) to external yield protocols like Aave, earning lending interest while the capital waits for trades. An LP in a boosted stablecoin pool earns both Balancer trading fees (from swaps) and Aave lending yield (from idle capital) simultaneously. This makes boosted pools significantly more capital-efficient than standard AMM pools where idle liquidity earns nothing.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f4" id="b4">
+        <h3>What is veBAL and how do I get it?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f4" class="faq-content" role="region" aria-labelledby="b4">
+        <p>veBAL (vote-escrowed BAL) is obtained by locking the BAL/WETH 80/20 Balancer Pool Token (BPT) for up to 1 year. First, become an LP in the BAL/WETH 80/20 pool to receive BPT. Then lock that BPT via the veBAL interface — the longer your lock, the more veBAL you receive. veBAL holders earn 75% of protocol swap fees (in bb-a-USD), vote on gauge weights to direct BAL emissions, earn LP boosts (up to 2.5×), and receive bribes from protocols competing for gauge votes.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f5" id="b5">
+        <h3>What is Balancer's Smart Order Router and why does it matter?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f5" class="faq-content" role="region" aria-labelledby="b5">
+        <p>The Smart Order Router (SOR) is Balancer's algorithm that finds the optimal swap path — including direct swaps, multi-hop routes (A→B→C), and split execution across multiple pools simultaneously in one transaction. For traders, this means best possible output for any swap. For LPs, this means even niche pools with unusual weightings can capture partial trade flow from large trades that benefit from splitting. SOR is also integrated into aggregators like 1inch, routing external volume to Balancer pools.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f6" id="b6">
+        <h3>What is Aura Finance and how does it relate to Balancer?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f6" class="faq-content" role="region" aria-labelledby="b6">
+        <p>Aura Finance is to Balancer what Convex Finance is to Curve — it's a veBAL aggregator. Aura pools BAL from users, converts it to veBAL en masse, and shares the governance power and rewards back to depositors. By using Aura, smaller BAL holders access near-maximum veBAL boost without locking their own BPT, while Aura handles governance on their behalf. AURA tokens accrue the value of veBAL control. For large BAL positions, direct veBAL locking gives more control; for smaller positions, Aura offers better efficiency.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f7" id="b7">
+        <h3>What is a Liquidity Bootstrapping Pool (LBP) on Balancer?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f7" class="faq-content" role="region" aria-labelledby="b7">
+        <p>An LBP is a Balancer managed pool used for token launches where the new token starts at a very high weight (e.g. 90%) and the weight gradually decreases over the launch period (e.g. 3–7 days). This natural weight shift creates downward price pressure, discouraging bots from front-running the launch and allowing organic price discovery. Buyers have an incentive to wait for the price to fall rather than front-run. Many DeFi protocols (Perpetual Protocol, Radicle, others) have used LBPs as a fairer alternative to standard IDO launches.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f8" id="b8">
+        <h3>How does impermanent loss work differently on Balancer vs Uniswap?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f8" class="faq-content" role="region" aria-labelledby="b8">
+        <p>Impermanent loss (IL) on a 50/50 Uniswap pool is the standard reference. On a Balancer 80/20 pool, IL is significantly lower for the same price movement — because your exposure is already heavily skewed toward the dominant asset, so price divergence has less rebalancing impact. For example, if ETH 2× from your entry point, an 80/20 ETH/USDC Balancer pool incurs roughly 0.6% IL versus roughly 5.7% IL for a 50/50 Uniswap pool. The tradeoff: lower fees because less arbitrage occurs in asymmetric pools.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-button" aria-expanded="false" aria-controls="f9" id="b9">
+        <h3>Which chains does Balancer support?</h3><span class="faq-plus">+</span>
+      </button>
+      <div id="f9" class="faq-content" role="region" aria-labelledby="b9">
+        <p>Balancer is deployed on Ethereum mainnet, Arbitrum, Optimism, Polygon, Avalanche, Gnosis Chain, and Base — with the same pool types and governance infrastructure available on each supported network. The BAL/veBAL governance system is primarily anchored on Ethereum mainnet. Gauge emissions can be directed to pools on any supported chain via cross-chain gauge infrastructure. Check the official Balancer documentation for the current list of supported networks as deployments expand.</p>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="container" role="contentinfo" style="padding:2.5rem 0; border-top:1px solid var(--line); margin-top:2rem">
+  <p style="color:var(--dim); font-size:.93rem">© 2026 Balancer Swap Guide. Educational content with a security-first operational focus. Not financial advice.</p>
+</footer>
+
+<script>
+  document.querySelectorAll('.faq-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isOpen = btn.getAttribute('aria-expanded') === 'true';
+      document.querySelectorAll('.faq-button').forEach(b => {
+        b.setAttribute('aria-expanded', 'false');
+        const c = document.getElementById(b.getAttribute('aria-controls'));
+        c.classList.remove('open'); c.style.maxHeight = '0';
+      });
+      if (!isOpen) {
+        btn.setAttribute('aria-expanded', 'true');
+        const content = document.getElementById(btn.getAttribute('aria-controls'));
+        content.classList.add('open');
+        content.style.maxHeight = content.scrollHeight + 'px';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
